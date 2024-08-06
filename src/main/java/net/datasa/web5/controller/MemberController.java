@@ -7,7 +7,6 @@ import net.datasa.web5.security.AuthenticatedUser;
 import net.datasa.web5.service.MemberService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,6 +28,7 @@ public class MemberController {
 
     /**
      * 로그인폼으로 이동
+     * 
      * @return 로그인 HTML
      */
     @GetMapping("loginForm")
@@ -38,6 +38,7 @@ public class MemberController {
 
     /**
      * 가입폼으로 이동
+     * 
      * @return 가입폼 HTML
      */
     @GetMapping("join")
@@ -47,6 +48,7 @@ public class MemberController {
 
     /**
      * 가입 정보를 입력받아 회원으로 등록하고 메인 페이지로 리다이렉트한다.
+     * 
      * @param member 사용자가 입력한 가입 정보
      * @return 메인 페이지 리다이렉트 URL
      */
@@ -68,6 +70,7 @@ public class MemberController {
 
     /**
      * 아이디 중복 확인
+     * 
      * @param searchId 검색할 ID
      */
     @PostMapping("idCheck")
@@ -83,8 +86,9 @@ public class MemberController {
 
     /**
      * 로그인한 사용자의 정보를 모델에 저장하고 개인정보 수정화면으로 이동
-     * @param user   로그인한 사용자 정보
-     * @param model  모델
+     * 
+     * @param user  로그인한 사용자 정보
+     * @param model 모델
      * @return 수정폼 HTML
      */
     @GetMapping("info")
@@ -99,8 +103,7 @@ public class MemberController {
      * 개인정보 수정 처리
      */
     @PostMapping("info")
-    public String info(@AuthenticationPrincipal AuthenticatedUser user
-            , @ModelAttribute MemberDTO member) {
+    public String info(@AuthenticationPrincipal AuthenticatedUser user, @ModelAttribute MemberDTO member) {
         log.debug("수정할 정보 : {}", member);
         member.setMemberId(user.getUsername());
 

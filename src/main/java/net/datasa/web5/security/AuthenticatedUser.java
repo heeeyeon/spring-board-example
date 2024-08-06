@@ -18,9 +18,9 @@ import java.util.Collections;
 @AllArgsConstructor
 @ToString
 public class AuthenticatedUser implements UserDetails {
-	private static final long serialVersionUID = -4224581921517576510L;
+    private static final long serialVersionUID = -4224581921517576510L;
 
-	private String id;
+    private String id;
     private String password;
     private String name;
     private String roleName;

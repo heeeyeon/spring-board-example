@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    //로그인 없이 접근 가능 경로
+    // 로그인 없이 접근 가능 경로
     private static final String[] PUBLIC_URLS = {
             "/"                     //root
             , "/images/**"          //이미지 경로
@@ -33,27 +33,24 @@ public class WebSecurityConfig {
     @Bean
     protected SecurityFilterChain config(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(author -> author
-                .requestMatchers(PUBLIC_URLS).permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(formLogin -> formLogin
-                    .loginPage("/member/loginForm")
-                    .usernameParameter("id")
-                    .passwordParameter("password")
-                    .loginProcessingUrl("/member/login")
-                    .defaultSuccessUrl("/", true)
-                    .permitAll()
-            )
-            .logout(logout -> logout
-                    .logoutUrl("/member/logout")
-                    .logoutSuccessUrl("/")
-            );
+                .authorizeHttpRequests(author -> author
+                        .requestMatchers(PUBLIC_URLS).permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/member/loginForm")
+                        .usernameParameter("id")
+                        .passwordParameter("password")
+                        .loginProcessingUrl("/member/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/member/logout")
+                        .logoutSuccessUrl("/"));
 
         http
-            .cors(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable);
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

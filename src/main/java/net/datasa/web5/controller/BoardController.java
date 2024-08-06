@@ -3,14 +3,12 @@ package net.datasa.web5.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datasa.web5.domain.dto.BoardDTO;
-import net.datasa.web5.domain.dto.MemberDTO;
 import net.datasa.web5.domain.dto.ReplyDTO;
 import net.datasa.web5.security.AuthenticatedUser;
 import net.datasa.web5.service.BoardService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * 게시판 관련 콘트롤러
+ * 게시판 관련 컨트롤러
  */
 
 @Slf4j
@@ -30,7 +28,7 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    //application.properties 파일의 게시판 관련 설정값
+    // application.properties 파일의 게시판 관련 설정값
     @Value("${board.pageSize}")
     int pageSize;
 
@@ -42,6 +40,7 @@ public class BoardController {
 
     /**
      * 게시판 전체 글 목록. 검색 및 페이지 지정 없이 모두 조회
+     * 
      * @param model
      * @return 글 목록 페이지
      */
@@ -55,11 +54,11 @@ public class BoardController {
     /**
      * 게시판 목록을 조회하고 페이징 및 검색 기능을 제공
      *
-     * @param model       모델 객체
-     * @param page        현재 페이지 (default: 0)
-     * @param searchType  검색 대상 (default: "")
-     * @param searchWord  검색어 (default: "")
-     * @return 글 목록  한 페이지
+     * @param model      모델 객체
+     * @param page       현재 페이지 (default: 0)
+     * @param searchType 검색 대상 (default: "")
+     * @param searchWord 검색어 (default: "")
+     * @return 글 목록 한 페이지
      */
     @GetMapping("list")
     public String list(Model model
@@ -70,7 +69,7 @@ public class BoardController {
         log.debug("설정 값 : pageSize={}, linkSize={}", pageSize, linkSize);
         log.debug("요청파라미터 : page={}, searchType={}, searchWord={}", page, searchType, searchWord);
 
-        //글 목록 1페이지
+        // 글 목록 1페이지
         Page<BoardDTO> boardPage = boardService.getList(page, pageSize, searchType, searchWord);
 
         model.addAttribute("boardPage", boardPage);
@@ -91,6 +90,7 @@ public class BoardController {
 
     /**
      * 글쓰기 폼으로 이동
+     * 
      * @return 글쓰기폼 HTML 파일 경로
      */
     @GetMapping("write")
@@ -100,9 +100,10 @@ public class BoardController {
 
     /**
      * 글 저장
-     * @param boardDTO 작성한 글 정보 (제목, 내용)
-     * @param user 로그인한 사용자 정보
-     * @return 게시판 글목록 경로
+     * 
+     * @param boardDTO  작성한 글 정보 (제목, 내용)
+     * @param user      로그인한 사용자 정보
+     * @return          게시판 글목록 경로
      */
     @PostMapping("write")
     public String write(
@@ -110,16 +111,16 @@ public class BoardController {
             , @RequestParam("upload") MultipartFile upload // 파일은 이미 업로드 되었고 파일에 대한 정보를 담고있는 객체
             , @AuthenticationPrincipal AuthenticatedUser user) {
 
-        //작성한 글에 사용자 아이디 추가
+        // 작성한 글에 사용자 아이디 추가
         boardDTO.setMemberId(user.getUsername());
         log.debug("저장할 글 정보 : {}", boardDTO);
-        
-        //업로드한 파일에 대한 정보 확인
+
+        // 업로드한 파일에 대한 정보 확인
         if (upload != null) {
-			log.debug("파라미터 이름{}",  upload.getName());
-			log.debug("파일 크기{}",  upload.getSize());
-			log.debug("파일 종류{}",  upload.getContentType());
-		}
+            log.debug("파라미터 이름{}", upload.getName());
+            log.debug("파일 크기{}", upload.getSize());
+            log.debug("파일 종류{}", upload.getContentType());
+        }
 
         boardService.write(boardDTO, uploadPath, upload);
         return "redirect:list";
@@ -127,8 +128,9 @@ public class BoardController {
 
     /**
      * 게시글 상세보기
-     * @param model     모델
-     * @param boardNum  조회할 글 번호
+     * 
+     * @param model    모델
+     * @param boardNum 조회할 글 번호
      * @return 게시글 상세보기 HTML 경로
      */
     @GetMapping("read")
@@ -140,8 +142,7 @@ public class BoardController {
 
             model.addAttribute("board", boardDTO);
             return "boardView/read";
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return "redirect:list";
         }
     }
@@ -159,8 +160,7 @@ public class BoardController {
 
         try {
             boardService.delete(boardNum, user.getUsername(), uploadPath);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -186,8 +186,7 @@ public class BoardController {
             }
             model.addAttribute("board", boardDTO);
             return "boardView/updateForm";
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "redirect:list";
         }
@@ -208,8 +207,7 @@ public class BoardController {
             boardService.update(boardDTO, user.getUsername());
             return "redirect:read?boardNum=" + boardDTO.getBoardNum();
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "redirect:list";
         }
@@ -217,23 +215,24 @@ public class BoardController {
 
     /**
      * 리플 쓰기
-     * @param replyDTO      저장할 리플 정보
-     * @param user          로그인 사용자 정보
-     * @return              게시글 보기 경로로 이동
+     * 
+     * @param replyDTO  저장할 리플 정보
+     * @param user      로그인 사용자 정보
+     * @return          게시글 보기 경로로 이동
      */
     @PostMapping("replyWrite")
-    public String replyWrite(@ModelAttribute ReplyDTO replyDTO
-            , @AuthenticationPrincipal AuthenticatedUser user) {
+    public String replyWrite(@ModelAttribute ReplyDTO replyDTO, @AuthenticationPrincipal AuthenticatedUser user) {
         replyDTO.setMemberId(user.getUsername());
         boardService.replyWrite(replyDTO);
         return "redirect:read?boardNum=" + replyDTO.getBoardNum();
     }
 
     /**
-     * 리플 삭제     *
-     * @param replyDTO 삭제할 리플번호와 본문 글번호
-     * @param user 로그인한 사용자 정보
-     * @return 게시글 상세보기 경로
+     * 리플 삭제 *
+     * 
+     * @param replyDTO  삭제할 리플번호와 본문 글번호
+     * @param user      로그인한 사용자 정보
+     * @return          게시글 상세보기 경로
      */
     @GetMapping("replyDelete")
     public String replyDelete(
@@ -242,8 +241,7 @@ public class BoardController {
 
         try {
             boardService.replyDelete(replyDTO.getReplyNum(), user.getUsername());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "redirect:read?boardNum=" + replyDTO.getBoardNum();

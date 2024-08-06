@@ -17,14 +17,15 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class MemberService {
 
-    //암호화 인코더
+    // 암호화 인코더
     private final BCryptPasswordEncoder passwordEncoder;
 
-    //회원 관련 리포지토리
+    // 회원 관련 리포지토리
     private final MemberRepository memberRepository;
 
     /**
      * 가입시 아이디 중복 확인
+     * 
      * @param searchId 조회할 아이디
      * @return 해당 아이디로 가입 가능 여부
      */
@@ -32,9 +33,9 @@ public class MemberService {
         return !memberRepository.existsById(searchId);
     }
 
-
     /**
      * 회원 가입 처리
+     * 
      * @param dto 회원 정보
      */
     public void join(MemberDTO dto) {
@@ -54,6 +55,7 @@ public class MemberService {
 
     /**
      * 회원정보 조회
+     * 
      * @param id 조회할 아이디
      * @return 한 명의 회원정보
      */
@@ -77,6 +79,7 @@ public class MemberService {
 
     /**
      * 회원정보 수정
+     * 
      * @param dto 수정할 회원정보
      */
     public void updateMember(MemberDTO dto) {

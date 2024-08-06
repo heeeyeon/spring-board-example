@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface ReplyRepository extends JpaRepository<ReplyEntity, Integer> {
 
-    //한 게시글의 리플
+    // 한 게시글의 리플
     List<ReplyEntity> findByBoard_BoardNum(int boardNum, Sort sort);
 
 }

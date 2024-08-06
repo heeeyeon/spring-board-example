@@ -13,7 +13,7 @@ public class HomeController {
     /**
      * 메인화면으로 이동
      */
-    @GetMapping({"", "/"})
+    @GetMapping({ "", "/" })
     public String home() {
         return "home";
     }
