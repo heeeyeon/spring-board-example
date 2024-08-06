@@ -34,7 +34,9 @@
 </header>
 
 <section>
-<form id="writeForm" th:action="@{/board/write}"  method="post">
+<form id="writeForm" th:action="@{/board/write}"  method="post"
+	enctype="multipart/form-data">	
+	<!-- 바이너리 첨부 데이터를 컨트롤러로 가져갈 수 있게 해 줌 -->
 	
 	<table>
 	<tr>

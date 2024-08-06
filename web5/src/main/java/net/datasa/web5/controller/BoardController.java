@@ -14,6 +14,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -106,13 +107,21 @@ public class BoardController {
     @PostMapping("write")
     public String write(
             @ModelAttribute BoardDTO boardDTO
+            , @RequestParam("upload") MultipartFile upload // 파일은 이미 업로드 되었고 파일에 대한 정보를 담고있는 객체
             , @AuthenticationPrincipal AuthenticatedUser user) {
 
         //작성한 글에 사용자 아이디 추가
         boardDTO.setMemberId(user.getUsername());
         log.debug("저장할 글 정보 : {}", boardDTO);
+        
+        //업로드한 파일에 대한 정보 확인
+        if (upload != null) {
+			log.debug("파라미터 이름{}",  upload.getName());
+			log.debug("파일 크기{}",  upload.getSize());
+			log.debug("파일 종류{}",  upload.getContentType());
+		}
 
-        boardService.write(boardDTO);
+        boardService.write(boardDTO, uploadPath, upload);
         return "redirect:list";
     }
 
@@ -149,7 +158,7 @@ public class BoardController {
             , @AuthenticationPrincipal AuthenticatedUser user) {
 
         try {
-            boardService.delete(boardNum, user.getUsername());
+            boardService.delete(boardNum, user.getUsername(), uploadPath);
         }
         catch (Exception e) {
             e.printStackTrace();

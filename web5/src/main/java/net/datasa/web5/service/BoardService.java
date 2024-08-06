@@ -17,9 +17,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 게시판 관련 서비스
@@ -36,9 +42,11 @@ public class BoardService {
 
     /**
      * 게시판 글 저장
-     * @param boardDTO 저장할 글 정보
+     * @param boardDTO 		저장할 글 정보
+     * @param upload 		파일을 저장할 경로
+     * @param uploadPath 	업로드 된 파일 정보
      */
-    public void write(BoardDTO boardDTO) {
+    public void write(BoardDTO boardDTO, String uploadPath, MultipartFile upload) {
         MemberEntity memberEntity = memberRepository.findById(boardDTO.getMemberId())
                 .orElseThrow(() -> new EntityNotFoundException("회원아이디가 없습니다."));
 
@@ -47,8 +55,41 @@ public class BoardService {
         entity.setTitle(boardDTO.getTitle());
         entity.setContents(boardDTO.getContents());
 
+        //첨부파일이 있으면 처리
+        if (upload != null && !upload.isEmpty()){
+            //저장할 경로의 폴더가 없으면 생성
+            File directoryPath = new File(uploadPath); //삭제 생성 확인 정도를 할수있는 패키지
+            if (directoryPath.isDirectory()){
+                directoryPath.mkdirs(); //디렉터리가 존재하는지 확인하고 없으면 if구문 안으로 들어와 디렉터리 생성함
+            }
+            //새로운 파일명
+            //홍길동의 이력서.doc -> 20240806_UUID로 생성한 랜덤문자열.doc
+            String originalName = upload.getOriginalFilename();
+            String extension = originalName.substring(originalName.lastIndexOf(".")); //확장자보존
+            String dateString = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String uuidString = UUID.randomUUID().toString();   //고유한 식별자를 생성할 때 사용하는 자바유틸클래스
+            String fileName = dateString + "_" + uuidString + extension;
+            //여기까지 파일이름만 만든거
+
+            //예외처리 하는 타이밍에 따라 파일의 존재 여부에 따른 글 저장 처리를 다르게 한다.
+            try {
+                //파일 복사 //실제 파일을 만들어주는타이밍
+                File filePath = new File(directoryPath + "/" + fileName);
+                //실제저장하고자 하는 위치로 이동시킴
+                upload.transferTo(filePath);
+                //원래 이름과 저장된 이름을 Entity에 입력
+                entity.setOriginalName(originalName);
+                entity.setFileName(fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
         log.debug("저장되는 엔티티 : {}", entity);
-        //todo : 첨부 파일 처리할 것
+		log.debug("파일 존재 여부{}",  upload.isEmpty());
+		log.debug("파일의 이름{}",  upload.getOriginalFilename());
+		
+
 
         boardRepository.save(entity);
     }
@@ -189,16 +230,30 @@ public class BoardService {
 
     /**
      * 게시글 삭제
-     * @param boardNum  삭제할 글번호
-     * @param username  로그인한 아이디
+     *
+     * @param boardNum      삭제할 글번호
+     * @param username      로그인한 아이디
+     * @param uploadPath    첨부파일이 저장된 경로
      */
-    public void delete(int boardNum, String username) {
+    public void delete(int boardNum, String username, String uploadPath) {
         BoardEntity boardEntity = boardRepository.findById(boardNum)
                 .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다."));
 
+        // 본인 글인지 확인하고 본인 글일때만 삭제 가능하도록 함
         if (!boardEntity.getMember().getMemberId().equals(username)) {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
+
+        //첨부파일이 있으면 삭제처리(를 하기전에 파일의 이름이 존재하는지 확인하여 삭제)
+        if (boardEntity.getFileName() != null
+                && !boardEntity.getFileName().isEmpty()) {
+            //경로와 파일이름을 담아서 객체 생성
+            File file = new File(uploadPath, boardEntity.getFileName());
+            //서버측 하드에 저장된 파일을 삭제
+            file.delete();
+        }
+        
+        //데이터베이스의 글 삭제
         boardRepository.delete(boardEntity);
     }
 
