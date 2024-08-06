@@ -46,6 +46,7 @@ public class BoardService {
      * @param upload 		파일을 저장할 경로
      * @param uploadPath 	업로드 된 파일 정보
      */
+    // 파일 저장 실패시 여기서 예외처리를 할 수도 있음
     public void write(BoardDTO boardDTO, String uploadPath, MultipartFile upload) {
         MemberEntity memberEntity = memberRepository.findById(boardDTO.getMemberId())
                 .orElseThrow(() -> new EntityNotFoundException("회원아이디가 없습니다."));
@@ -62,25 +63,29 @@ public class BoardService {
             if (directoryPath.isDirectory()){
                 directoryPath.mkdirs(); //디렉터리가 존재하는지 확인하고 없으면 if구문 안으로 들어와 디렉터리 생성함
             }
-            //새로운 파일명
-            //홍길동의 이력서.doc -> 20240806_UUID로 생성한 랜덤문자열.doc
+            //새로운 파일명(저장할 파일 명)
+            //홍길동의 이력서.doc -> 20240806_UUID로 생성한 랜덤문자열(16진수128비트의문자열).doc
+            //20240806_d8e91593-f693-4280-9904-10637d85a46f.doc
             String originalName = upload.getOriginalFilename();
             String extension = originalName.substring(originalName.lastIndexOf(".")); //확장자보존
             String dateString = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            //클래스명 뒤에 바로. 붙이고 호출하는 메서드 = 스태틱 메서드
             String uuidString = UUID.randomUUID().toString();   //고유한 식별자를 생성할 때 사용하는 자바유틸클래스
             String fileName = dateString + "_" + uuidString + extension;
             //여기까지 파일이름만 만든거
 
             //예외처리 하는 타이밍에 따라 파일의 존재 여부에 따른 글 저장 처리를 다르게 한다.
             try {
-                //파일 복사 //실제 파일을 만들어주는타이밍
+                //파일 복사 //실제 파일을 만들어주는타이밍, 객체가 생성됨
+                // File file = new File(uploadPath, fileName);  // 작성법 두개
                 File filePath = new File(directoryPath + "/" + fileName);
-                //실제저장하고자 하는 위치로 이동시킴
+                //실제저장하고자 하는 위치로 이동시킴 //스트림을 이용해 1바이트씩 옮길 수 있으나 File클래스가 제공하는 메서드를 이용하는 것
                 upload.transferTo(filePath);
                 //원래 이름과 저장된 이름을 Entity에 입력
                 entity.setOriginalName(originalName);
                 entity.setFileName(fileName);
             } catch (IOException e) {
+                log.debug("파일 저장 실패");
                 e.printStackTrace();
             }
 
