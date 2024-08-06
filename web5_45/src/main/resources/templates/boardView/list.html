@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>게시판</title>
+	<link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+
+	<!-- 페이지 이동 스크립트  -->
+	<script>
+	function pagingFormSubmit(currentPage) {
+		$('#page').val(currentPage);
+		$('#pagingForm').submit();
+	}
+	</script>
+
+</head>
+<body>
+<header>
+	<h1><a th:href="@{/board/list}">[ 게시판 ]</a></h1>
+</header>
+<section>
+<!--/*
+	<div>[[${boardPage.getContent()}]]</div>
+	<div>[[${boardPage.getTotalElements()}]]</div>
+	<div>[[${boardPage.getTotalPages()}]]</div>
+	<div>[[${boardPage.getNumber()}]]</div>
+	<div>[[${boardPage.getSize()}]]</div>
+	<div>[[${boardPage.hasPrevious()}]]</div>
+	<div>[[${boardPage.hasNext()}]]</div>
+*/-->
+
+	<!-- 글목록 출력 영역 -->
+	<table>
+		<tr>
+			<td class="white">
+				전체 <span th:text="${boardPage.totalElements}"></span>
+			</td>
+			<td class="white">페이지 <span th:text="${page}"></span> of <span th:text="${boardPage.getTotalPages()}"></span></td>
+			<td class="white" colspan="2"></td>
+			<td class="head">
+				<a sec:authorize="isAuthenticated()" th:href="@{/board/write}">글쓰기</a>
+				<a th:href="@{/}">HOME</a>
+			</td>
+		</tr>
+		<tr>
+			<th>번호</th>
+			<th style="width:300px;">제목</th>
+			<th>작성자</th>
+			<th>조회수</th>
+			<th>작성일</th>
+		</tr>
+		<tr th:each="board, status : ${boardPage}">
+			<td th:text="${board.boardNum}" class="center"></td>
+			<td>
+				<!--/* <a th:text="${board.title}" th:href="@{/board/read(boardNum=${board.boardNum})}"></a> */-->
+				<a th:text="${board.title}" th:href="|read?boardNum=${board.boardNum}|"></a>
+			</td>
+			<td th:text="${board.memberId}" class="center"></td>
+			<td th:text="${board.viewCount}" class="center"></td>
+			<td th:text="${#temporals.format(board.createDate, 'yy.MM.dd HH:mm')}"></td>
+		</tr>
+	</table>
+
+	<div id="navigator">
+
+	<!-- 페이지 이동 링크 -->
+	<span th:if="${boardPage.getTotalPages() > 0 and page != 1}">
+		<a href="javascript:pagingFormSubmit(1)">첫페이지</a>
+	</span>
+	<span
+		th:if="${boardPage.getTotalPages() > 0}"
+		th:each="counter : ${#numbers.sequence((page - linkSize < 1 ? 1 : page - linkSize), (page + linkSize > boardPage.getTotalPages() ? boardPage.getTotalPages() : page + linkSize))}">
+		<th:block th:if="${counter == page}"><b></th:block>
+			<a th:text="${counter}" th:href="|javascript:pagingFormSubmit(${counter})|"></a>&nbsp;
+		<th:block th:if="${counter == page}"></b></th:block>
+	</span>
+	<span th:if="${boardPage.getTotalPages() > 0 and page != boardPage.getTotalPages()}">
+		<a th:href="|javascript:pagingFormSubmit(${boardPage.getTotalPages()})|">마지막페이지</a>
+	</span>
+	<br><br>
+
+	<!-- 검색폼 -->
+	<form id="pagingForm" method="get" th:action="@{/board/list}">
+		<input type="hidden" name="page" id="page" />
+		<select id="type" name="searchType">
+			<option value="title" th:selected="${searchType == 'title'}">제목</option>
+			<option value="contents" th:selected="${searchType == 'contents'}">본문</option>
+			<option value="id" th:selected="${searchType == 'id'}">작성자ID</option>
+		</select>
+		<input type="text"  name="searchWord" th:value="${searchWord}">
+		<input type="button" onclick="pagingFormSubmit(1)" value="검색">
+	</form>
+
+	</div>
+
+</section>
+</body>
+</html>

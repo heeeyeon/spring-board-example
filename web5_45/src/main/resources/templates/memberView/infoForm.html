@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>회원가입</title>
+	<link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+	<script>
+		$(document).ready(function() {
+			$('#updateForm').submit(function() {
+				let pw = $('#memberPassword').val();
+				let pw2 = $('#memberPassword2').val();
+				let name = $('#memberName').val();
+
+				if (pw != '' && (pw.length < 3 || pw.length > 10)) {
+					alert("비밀번호는 3~10자로 입력하세요.");
+					return false;
+				}
+				if (pw != pw2) {
+					alert("비밀번호를 정확하게 다시 입력하세요.");
+					return false;
+				}
+				if (name == '') {
+					alert("이름을 입력하세요.");
+					return false;
+				}
+				return true;
+			});
+		});
+</script>
+</head>
+<body>
+	<header>
+	<h1>[ 개인정보 수정 ]</h1>
+	</header>
+	<section>
+	<form id="updateForm" th:action="@{/member/info}"  method="post">
+	<table>
+		<tr>
+			<th>ID</th>
+			<td th:text="${member.memberId}"></td>
+		</tr>
+		<tr>
+			<th>비밀번호</th>
+			<td><input type="password" name="memberPassword" id="memberPassword" placeholder="비밀번호를 변경하려면 입력하세요."><br>
+			<input type="password" id="memberPassword2" placeholder="비밀번호 다시 입력"></td>
+		</tr>
+		<tr>
+			<th>이름</th>
+			<td><input type="text" name="memberName" id="memberName" th:value="${member.memberName}" placeholder="이름 입력"></td>
+		</tr>
+		<tr>
+			<th>이메일</th>
+			<td><input type="text" name="email" id="email" th:value="${member.email}" placeholder="이메일 입력"></td>
+		</tr>
+		<tr>
+			<th>전화번호</th>
+			<td><input type="text" name="phone" th:value="${member.phone}" placeholder="전화번호 입력"></td>
+		</tr>
+		<tr>
+			<th>주소</th>
+			<td><input type="text" name="address" th:value="${member.address}" placeholder="주소 입력" style="width:300px;"></td>
+		</tr>
+	</table>
+	<br>
+	
+	<input type="submit" value="수정" />
+	<input type="reset" value="다시 쓰기" />
+	
+	</form>	
+	</section>
+	
+</body>
+</html>

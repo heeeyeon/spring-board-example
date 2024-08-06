@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>ID 중복 확인</title>
+	<link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+	<script>
+		$(document).ready(function() {
+			//검색어 입력 확인
+			$('#searchForm').submit(function() {
+				let searchId = $('#searchId').val();
+
+				if (searchId.length < 3 || searchId.length > 10) {
+					alert("검색할 ID를 3~10자로 입력하세요.");
+					return false;
+				}
+				return true;
+			});
+
+			//가입폼에 아이디 입력하고 창 닫기
+			$('#inputButton').click(function() {
+				let id = $(this).data('id');
+				$(opener.document).find('#memberId').val(id);
+				window.close();
+			});
+		});
+	</script>
+</head>
+<body>
+<header>
+	<h1>[ ID 중복 확인 ]</h1>
+</header>
+<br>
+<section>
+	<form id="searchForm" action="idCheck" method="post">
+		검색할 ID <input type="text" name="searchId" id="searchId">
+				<input type="submit" value="검색" />
+	</form>
+
+	<!-- 검색 후에만 출력 -->
+	<div th:if="${result != null}">
+		<!-- 사용 가능한 경우에만 출력 -->
+		<div th:if="${result}">
+			<p><span th:text="${searchId}"></span><span> : 사용할 수 있는 ID입니다.</span></p>
+			<p><input type="button" value="ID사용하기" id="inputButton" th:data-id="${searchId}"></p>
+		</div>
+		<!-- 사용 불가능한 경우에만 출력 -->
+		<div th:if="${not result}">
+			<p><span th:text="${searchId}"></span><span> : 이미 사용중인 ID입니다.</span></p>
+		</div>
+	</div>
+</section>
+</body>
+</html>

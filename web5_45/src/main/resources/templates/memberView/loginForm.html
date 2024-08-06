@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>로그인</title>
+	<link rel="stylesheet" type="text/css" th:href="@{/css/main.css}">
+	<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+	<script>
+		$(document).ready(function() {
+			$('#loginForm').submit(function() {
+				if ($('#id').val() == '' || $('#password').val() == '') {
+					alert('ID와 비밀번호를 입력하세요.');
+					return false;
+				}
+				return true;
+			});
+		});
+	</script>
+</head>
+<body>
+	<header>
+	<h1>[ 로그인 ]</h1>
+	</header>
+	
+	<section>
+		<form id="loginForm" th:action="@{/member/login}" method="post">
+		<table>
+		<tr>
+			<td>ID</td>
+			<td><input type="text" name="id" id="id" /></td>
+		</tr>
+		<tr>
+			<td>Password</td>
+			<td><input type="password" name="password" id="password" /></td>
+		</tr>
+		<tr>
+			<td class="white"></td>
+			<td class="white">
+				<div class="errorMsg" th:if="${param.error}">ID또는 비밀번호가 틀립니다.</div>
+				<div class="errorMsg" th:if="${param.error}"><script>alert('ID또는 비밀번호가 틀립니다.')</script></div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" class="center white">
+				<input type="submit" value="Login" />
+			</td>
+		</tr>
+		</table>
+		</form>
+	</section>
+
+</body>
+</html>
