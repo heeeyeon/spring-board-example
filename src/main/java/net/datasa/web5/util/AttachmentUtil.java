@@ -5,8 +5,14 @@ import java.time.format.DateTimeFormatter;
 
 import java.util.UUID;
 
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 
+@Slf4j
+@Component
 public class AttachmentUtil {
 
     // 이미 업로드 된 첨부파일이 있는 경우의 처리
@@ -16,13 +22,19 @@ public class AttachmentUtil {
     /**
      * 저장할 경로의 폴더가 없으면 생성
      * 
-     * @param path
-     * @return String
+     * @param path      파일을 저장할 경로를 문자열 인자로 받아온다
+     * @return File     확인된 경로 정보를 File객체에 담아 리턴한다
      */
     public File ensureDirectoryExists(String path) {
         File directoryPath = new File(path); // 삭제 생성 확인 정도를 할수있는 패키지
+        // 디렉터리가 존재하는지 확인하고 없으면 if구문 안으로 들어와 디렉터리 생성함
         if (directoryPath.isDirectory()) {
-            directoryPath.mkdirs(); // 디렉터리가 존재하는지 확인하고 없으면 if구문 안으로 들어와 디렉터리 생성함
+            boolean success = directoryPath.mkdirs();
+            if (success) {
+                log.debug("Directories created successfully.");
+            } else {
+                log.debug("Failed to create directories.");
+            }
         }
         return directoryPath;
     }
@@ -30,7 +42,7 @@ public class AttachmentUtil {
     /**
      * 새로운 파일 명을 만들어 주는 메서드
      * 
-     * @param originalFileName
+     * @param originalFileName  원래 파일이름
      * @return String
      * 
      */
@@ -43,15 +55,14 @@ public class AttachmentUtil {
         String dateString = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         // UUID 클래스 설명.. : 클래스명 뒤에 바로. 붙이고 호출하는 메서드 = 스태틱 메서드
         String uuidString = UUID.randomUUID().toString(); // 고유한 식별자를 생성할 때 사용하는 자바유틸클래스
-        String fileName = dateString + "_" + uuidString + extension;
 
-        return fileName;
+        return dateString + "_" + uuidString + extension;
     }
 
     /**
      * 파일명에서 확장자를 가져와 리턴하는 메서드
      * 
-     * @param fileName
+     * @param fileName  파일명
      * @return String
      */
     public String getExtenstion(String fileName) {
