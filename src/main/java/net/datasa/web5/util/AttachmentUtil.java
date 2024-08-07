@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 import java.util.UUID;
 
-import net.datasa.web5.domain.entity.BoardEntity;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +59,7 @@ public class AttachmentUtil {
     // 20240806_d8e91593-f693-4280-9904-10637d85a46f.doc
     public String createUniqueFileName(String originalFileName) {
         // 새로운 파일명(저장할 파일 명)
-        String extension = getExtenstion(originalFileName);
+        String extension = getExtension(originalFileName);
         // 유틸클래스의 Date가 아니라 time을 쓴다..
         String dateString = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         // UUID 클래스 설명.. : 클래스명 뒤에 바로. 붙이고 호출하는 메서드 = 스태틱 메서드
@@ -75,7 +74,7 @@ public class AttachmentUtil {
      * @param fileName 파일명
      * @return String extension
      */
-    public String getExtenstion(String fileName) {
+    public String getExtension(String fileName) {
         // 파일이름에서 마지막 dot의 인덱스를 확인
         int dotIndex = fileName.lastIndexOf('.');
         // 확장자가 없는 파일의 처리
