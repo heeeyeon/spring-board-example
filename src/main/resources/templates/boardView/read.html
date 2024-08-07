@@ -75,7 +75,10 @@
 	</tr>
 	<tr>
 		<th>파일첨부</th>
-		<td><a th:href="@{/board/download(boardNum=${board.boardNum})}" th:text="${board.originalName}"></a></td>
+		<td>
+			<img th:src="|download?boardNum=${board.boardNum}|">
+			<a th:href="@{/board/download(boardNum=${board.boardNum})}" th:text="${board.originalName}"></a>
+		</td>
 	</tr>
 	</table>
 <br>

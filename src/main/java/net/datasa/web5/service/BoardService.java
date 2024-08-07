@@ -1,6 +1,8 @@
 package net.datasa.web5.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +21,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -260,9 +266,10 @@ public class BoardService {
     /**
      * 게시글 수정
      *
-     * @param boardDTO   수정할 글정보
-     * @param username   로그인한 아이디
-     * @param uploadPath the upload path
+     * @param boardDTO     수정할 글정보
+     * @param username     로그인한 아이디
+     * @param uploadPath   the upload path
+     * @param uploadedFile the uploaded file
      */
     public void update(BoardDTO boardDTO, String username, String uploadPath, MultipartFile uploadedFile) {
         BoardEntity entity = boardRepository.findById(boardDTO.getBoardNum())
@@ -340,4 +347,46 @@ public class BoardService {
         }
         replyRepository.delete(replyEntity);
     }
+
+    /**
+     * Download.
+     *
+     * @param boardNum   the board num
+     * @param response   the response
+     * @param uploadPath the upload path
+     */
+    public void download(Integer boardNum, HttpServletResponse response, String uploadPath) {
+        // 글번호로 게시글 정보 DB에서조회
+        BoardEntity boardEntity = boardRepository.findById(boardNum)
+                .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다."));
+        // 응답정보의 헤더에 파일명 추가 원래의 파일 명
+        try {
+            response.setHeader("Content-Disposition", "attachment;filename="
+             + URLEncoder.encode(boardEntity.getOriginalName(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        // 파일의 저장 경로에서 파일 읽기 저장된 파일 경로 (예시 c:/upload/240806_UUID랜덤문자열.jpg)
+        String fullPath = uploadPath + "/" + boardEntity.getFileName();
+
+        // 서버의 파일을 읽을 입력 스트림과 클라이언트에게 전달할 출력 스트림
+        FileInputStream filein = null;
+        ServletOutputStream fileout = null;
+
+        try {
+            filein = new FileInputStream(fullPath); // 읽다가 실패한 경우 다운로드된 파일이 0바이트가 됨.
+            fileout = response.getOutputStream();   // 읽은 파일 정보를 response객체를 통해 출력
+
+            // Spring의 파일 관련 유틸 이용하여 출력 (원래 1바이트씩 처리하기때문에 반복문 필요, 스프링에서 제공하는 FileCopyUtils의 copy메서드 사용)
+            FileCopyUtils.copy(filein,fileout);
+
+            // 스트림 닫기
+            filein.close();
+            fileout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
