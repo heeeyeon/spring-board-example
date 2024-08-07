@@ -34,7 +34,8 @@
 </header>
 
 <section>
-<form id="updateForm" th:action="@{/board/update}"  method="post">
+<form id="updateForm" th:action="@{/board/update}"  method="post"
+	enctype="multipart/form-data">
 	<!--글 번호 -->
 	<input type="hidden" name="boardNum" th:value="${board.boardNum}">
 	

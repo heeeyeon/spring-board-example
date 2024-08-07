@@ -43,10 +43,10 @@ public class BoardService {
 
     /**
      * 게시판 글 저장
-     * 
-     * @param boardDTO      저장할 글 정보
-     * @param uploadPath    파일을 저장할 경로  // 컨트롤러에서 application.properties에 정의된 값을 가져온다.
-     * @param uploadedFile  업로드 된 파일 정보
+     *
+     * @param boardDTO     저장할 글 정보
+     * @param uploadPath   파일을 저장할 경로  // 컨트롤러에서 application.properties에 정의된 값을 가져온다.
+     * @param uploadedFile 업로드 된 파일 정보
      */
     // 파일 저장 실패시 여기서 예외처리를 할 수도 있음
     public void write(BoardDTO boardDTO, String uploadPath, MultipartFile uploadedFile) {
@@ -169,6 +169,7 @@ public class BoardService {
 
     /**
      * DB에서 조회한 게시글 정보인 BoardEntity 객체를 BoardDTO 객체로 변환
+     *
      * @param entity    게시글 정보 Entity 객체
      * @return          게시글 정보 DTO 개체
      */
