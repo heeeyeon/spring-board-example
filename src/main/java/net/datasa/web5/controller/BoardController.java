@@ -201,10 +201,11 @@ public class BoardController {
     @PostMapping("update")
     public String update(
             @ModelAttribute BoardDTO boardDTO
+            , @RequestParam("upload") MultipartFile upload
             , @AuthenticationPrincipal AuthenticatedUser user) {
 
         try {
-            boardService.update(boardDTO, user.getUsername());
+            boardService.update(boardDTO, user.getUsername(), uploadPath, upload);
             return "redirect:read?boardNum=" + boardDTO.getBoardNum();
 
         } catch (Exception e) {

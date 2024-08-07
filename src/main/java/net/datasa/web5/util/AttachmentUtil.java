@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import java.util.UUID;
 
+import net.datasa.web5.domain.entity.BoardEntity;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,19 @@ import java.io.File;
 @Component
 public class AttachmentUtil {
 
-    // 이미 업로드 된 첨부파일이 있는 경우의 처리
-    //
-    //
+
+    /**
+     * 파일을 삭제하는 처리를 하는 메서드
+     *
+     * @param uploadPath the upload path
+     * @param fileName   the file name
+     */
+    public void deleteIfAttachmentExists(String uploadPath, String fileName) {
+        // 경로와 파일이름을 담아서 객체 생성
+        File file = new File(uploadPath, fileName);
+        // 서버측 하드에 저장된 파일을 삭제
+        file.delete();
+    }
 
     /**
      * 저장할 경로의 폴더가 없으면 생성
@@ -41,10 +52,9 @@ public class AttachmentUtil {
 
     /**
      * 새로운 파일 명을 만들어 주는 메서드
-     * 
-     * @param originalFileName  원래 파일이름
-     * @return String
-     * 
+     *
+     * @param originalFileName 원래 파일이름
+     * @return String string
      */
     // 홍길동의 이력서.doc -> 20240806_UUID로 생성한 랜덤문자열(16진수128비트의문자열).doc
     // 20240806_d8e91593-f693-4280-9904-10637d85a46f.doc
@@ -61,9 +71,9 @@ public class AttachmentUtil {
 
     /**
      * 파일명에서 확장자를 가져와 리턴하는 메서드
-     * 
-     * @param fileName  파일명
-     * @return String
+     *
+     * @param fileName 파일명
+     * @return String extension
      */
     public String getExtenstion(String fileName) {
         // 파일이름에서 마지막 dot의 인덱스를 확인

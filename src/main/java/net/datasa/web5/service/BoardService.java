@@ -62,12 +62,12 @@ public class BoardService {
 
         // 첨부파일이 있으면 처리
         if (uploadedFile != null && !uploadedFile.isEmpty()) {
-            
+
 
             String originalName = uploadedFile.getOriginalFilename();
             String newFileName = attachmentUtil.createUniqueFileName(originalName);
             File directoryPath = attachmentUtil.ensureDirectoryExists(uploadPath);
-            
+
             // 예외처리 하는 타이밍에 따라 파일의 존재 여부에 따른 글 저장 처리를 다르게 한다.
             try {
                 // 파일 복사 //실제 파일을 만들어주는타이밍, 객체가 생성됨
@@ -91,7 +91,7 @@ public class BoardService {
 
     /**
      * 게시글 전체 조회
-     * 
+     *
      * @return 글 목록
      */
     public List<BoardDTO> getListAll() {
@@ -190,8 +190,9 @@ public class BoardService {
 
     /**
      * ReplyEntity객체를 ReplyDTO 객체로 변환
-     * @param entity    리플 정보 Entity 객체
-     * @return          리플 정보 DTO 객체
+     *
+     * @param entity 리플 정보 Entity 객체
+     * @return       리플 정보 DTO 객체
      */
     private ReplyDTO convertToReplyDTO(ReplyEntity entity) {
         return ReplyDTO.builder()
@@ -206,7 +207,7 @@ public class BoardService {
 
     /**
      * 게시글 1개 조회
-     * 
+     *
      * @param boardNum          글번호
      * @return the BoardDTO     글 정보
      * @throws EntityNotFoundException 게시글이 없을 때 예외
@@ -248,10 +249,7 @@ public class BoardService {
         // 첨부파일이 있으면 삭제처리(를 하기전에 파일의 이름이 존재하는지 확인하여 삭제)
         if (boardEntity.getFileName() != null
                 && !boardEntity.getFileName().isEmpty()) {
-            // 경로와 파일이름을 담아서 객체 생성
-            File file = new File(uploadPath, boardEntity.getFileName());
-            // 서버측 하드에 저장된 파일을 삭제
-            file.delete();
+            attachmentUtil.deleteIfAttachmentExists(uploadPath, boardEntity.getFileName());
         }
 
         // 데이터베이스의 글 삭제
@@ -260,28 +258,53 @@ public class BoardService {
 
     /**
      * 게시글 수정
-     * 
-     * @param boardDTO 수정할 글정보
-     * @param username 로그인한 아이디
+     *
+     * @param boardDTO   수정할 글정보
+     * @param username   로그인한 아이디
+     * @param uploadPath the upload path
      */
-    public void update(BoardDTO boardDTO, String username) {
-        BoardEntity boardEntity = boardRepository.findById(boardDTO.getBoardNum())
+    public void update(BoardDTO boardDTO, String username, String uploadPath, MultipartFile uploadedFile) {
+        BoardEntity entity = boardRepository.findById(boardDTO.getBoardNum())
                 .orElseThrow(() -> new EntityNotFoundException("게시글이 없습니다."));
 
-        if (!boardEntity.getMember().getMemberId().equals(username)) {
+        if (!entity.getMember().getMemberId().equals(username)) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
 
-        // todo : 첨부파일 처리
+        // 첨부파일이 있으면 삭제처리(를 하기전에 파일의 이름이 존재하는지 확인하여 삭제)
+        if (entity.getFileName() != null
+                && !entity.getFileName().isEmpty()) {
+            attachmentUtil.deleteIfAttachmentExists(uploadPath, entity.getFileName());
+        }
 
+        // 첨부파일이 있으면 처리
+        if (uploadedFile != null && !uploadedFile.isEmpty()) {
+            String originalName = uploadedFile.getOriginalFilename();
+            String newFileName = attachmentUtil.createUniqueFileName(originalName);
+            File directoryPath = attachmentUtil.ensureDirectoryExists(uploadPath);
+
+            try {
+                File filePath = new File(directoryPath + "/" + newFileName);
+                uploadedFile.transferTo(filePath);
+                entity.setOriginalName(originalName);
+                entity.setFileName(newFileName);
+            } catch (IOException e) {
+                log.debug("파일 저장 실패");
+                e.printStackTrace();
+            }
+
+        }
+        log.debug("저장되는 엔티티 : {}", entity);
+
+        boardRepository.save(entity);
         // 전달된 정보 수정
-        boardEntity.setTitle(boardDTO.getTitle());
-        boardEntity.setContents(boardDTO.getContents());
+        entity.setTitle(boardDTO.getTitle());
+        entity.setContents(boardDTO.getContents());
     }
 
     /**
      * 리플 저장
-     * 
+     *
      * @param replyDTO 작성한 리플 정보
      * @throws EntityNotFoundException 사용자 정보가 없을 때 예외
      */
@@ -303,7 +326,7 @@ public class BoardService {
 
     /**
      * 리플 삭제
-     * 
+     *
      * @param replyNum 삭제할 리플 번호
      * @param username 로그인한 아이디
      */
